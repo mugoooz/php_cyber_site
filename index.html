@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cybersecurity Skills Hub | Home</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- General Functionality: one external JS file, linked with defer -->
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="container">
+      <div class="logo">CyberSkills<span>Hub</span></div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="active">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="courses.html">Courses</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="register.html">Register</a></li>
+          <li><a href="view_registrations.php">Registrations</a></li>
+          <li><button id="theme-toggle" class="theme-btn" type="button">🌙 Dark mode</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Section A target: JS fills this in with the visitor's name -->
+  <div id="welcome-banner" class="welcome-banner" aria-live="polite"></div>
+
+  <section class="hero">
+    <h1>Learn to Defend the Digital World</h1>
+    <p>The Cybersecurity Skills Hub trains students and young professionals in
+      Nairobi with practical, hands-on security skills — from password hygiene
+      to SOC analysis.</p>
+    <a class="btn" href="register.html">Register today</a>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <span class="eyebrow">Why join us</span>
+      <h2>What you get at the hub</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h3>Hands-on Labs</h3>
+          <p>Practise in safe, simulated environments with real security tools
+            instead of just reading theory.</p>
+        </div>
+        <div class="card">
+          <h3>Industry Mentors</h3>
+          <p>Learn from working analysts and engineers from Kenya's growing
+            cybersecurity industry.</p>
+        </div>
+        <div class="card">
+          <h3>Career Support</h3>
+          <p>CV clinics, certification guidance and interview practice to help
+            you land your first security role.</p>
+        </div>
+      </div>
+
+      <!-- Section D: show/hide dynamic content -->
+      <p style="margin-top: 2rem;">
+        <button id="more-info-btn" class="btn btn-outline" type="button">
+          Learn more about the hub ▾
+        </button>
+      </p>
+      <div id="more-info" class="info-panel hidden">
+        <h3>About our training model</h3>
+        <p>Our programmes run in the evenings and on weekends so that
+          university students can attend without missing classes. Each cohort
+          spends 60% of its time in practical labs, 25% in guided theory and
+          15% on a capstone project presented to industry mentors. Graduates
+          leave with a portfolio they can show to employers such as SOC
+          providers, banks and telcos.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>CyberSkillsHub</h4>
+          <p>Building Kenya's next generation of cyber defenders.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="courses.html">Courses</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="register.html">Register</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li>📍 Nairobi, Kenya</li>
+            <li>✉️ info@cyberskillshub.co.ke</li>
+            <li>📞 +254 700 000 000</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Cybersecurity Skills Hub · JavaScript Lab · Web Application Development</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
