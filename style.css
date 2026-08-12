@@ -1,0 +1,423 @@
+/* ============================================================
+   Cybersecurity Skills Hub — style.css
+   Carried over from the CSS lab, with additions at the bottom
+   (marked "JS LAB ADDITIONS") to style the new JavaScript
+   features: welcome banner, dark mode, form errors, etc.
+   ============================================================ */
+
+/* ---------- Custom properties (CSS variables) ---------- */
+:root {
+  --clr-primary: #0f2a43;
+  --clr-accent: #19b28d;
+  --clr-accent-dark: #0e8a6c;
+  --clr-bg: #f6f9fc;
+  --clr-surface: #ffffff;
+  --clr-text: #1d2b38;
+  --clr-muted: #5b6b7a;
+  --clr-danger: #d64550;
+  --radius: 10px;
+  --shadow: 0 4px 14px rgba(15, 42, 67, 0.10);
+  --maxw: 1080px;
+}
+
+/* Dark mode: JS toggles .dark-mode on <body>, and these
+   overrides re-map the same variables site-wide. */
+body.dark-mode {
+  --clr-primary: #0b1926;
+  --clr-bg: #101b26;
+  --clr-surface: #182634;
+  --clr-text: #e8eef4;
+  --clr-muted: #9db0c0;
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- Reset & base ---------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
+}
+
+.container { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
+img { max-width: 100%; display: block; }
+
+/* ---------- Navbar (Flexbox) ---------- */
+.navbar {
+  background: var(--clr-primary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  gap: 0.75rem;
+}
+.logo { color: #fff; font-size: 1.3rem; font-weight: 700; letter-spacing: 0.5px; }
+.logo span { color: var(--clr-accent); }
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.nav-links a {
+  color: #dbe6f0;
+  text-decoration: none;
+  padding: 0.35rem 0.2rem;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-links a:hover { color: #fff; }
+.nav-links a.active { color: var(--clr-accent); border-bottom-color: var(--clr-accent); }
+
+/* Theme toggle button lives in the navbar */
+.theme-btn {
+  background: transparent;
+  color: #dbe6f0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.theme-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+/* ---------- Hero sections ---------- */
+.hero, .page-hero {
+  background: linear-gradient(135deg, var(--clr-primary), #123a5c 60%, #0e6e57);
+  color: #fff;
+  text-align: center;
+  padding: 4rem 1.25rem 4.5rem;
+}
+.hero h1, .page-hero h1 { font-size: 2.4rem; margin-bottom: 0.75rem; }
+.hero p, .page-hero p { max-width: 640px; margin: 0 auto 1.5rem; color: #d7e3ee; }
+
+.btn {
+  display: inline-block;
+  background: var(--clr-accent);
+  color: #fff;
+  border: none;
+  font: inherit;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn:hover { background: var(--clr-accent-dark); transform: translateY(-2px); }
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--clr-accent);
+  color: var(--clr-accent);
+}
+.btn-outline:hover { background: var(--clr-accent); color: #fff; }
+
+/* ---------- Generic sections & cards ---------- */
+.section { padding: 3.5rem 0; }
+.eyebrow {
+  display: inline-block;
+  color: var(--clr-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.4rem;
+}
+.section h2 { font-size: 1.8rem; margin-bottom: 1.25rem; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+.card {
+  background: var(--clr-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  transition: transform 0.2s;
+}
+.card:hover { transform: translateY(-4px); }
+.card h3 { margin-bottom: 0.5rem; color: var(--clr-accent-dark); }
+body.dark-mode .card h3 { color: var(--clr-accent); }
+.card p { color: var(--clr-muted); font-size: 0.95rem; }
+
+/* ---------- Tables ---------- */
+table { width: 100%; border-collapse: collapse; margin-top: 1.25rem; background: var(--clr-surface); }
+th, td { border: 1px solid #c8d4de; padding: 0.65rem 0.85rem; text-align: left; font-size: 0.95rem; }
+th { background: var(--clr-primary); color: #fff; }
+body.dark-mode th, body.dark-mode td { border-color: #2c3f52; }
+
+/* ---------- Gallery flip cards ---------- */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+.flip-card {
+  perspective: 1000px;
+  height: 300px;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.flip-card:hover .flip-inner,
+.flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.flip-front img { width: 100%; height: 100%; object-fit: cover; }
+.flip-back {
+  background: var(--clr-primary);
+  color: #e6eef6;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.flip-back h3 { color: var(--clr-accent); margin-bottom: 0.5rem; }
+
+/* JS adds .selected to the clicked card */
+.flip-card.selected { outline: 3px solid var(--clr-accent); outline-offset: 3px; }
+
+/* ---------- Form ---------- */
+form fieldset {
+  border: 1px solid #c8d4de;
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  background: var(--clr-surface);
+}
+body.dark-mode form fieldset { border-color: #2c3f52; }
+form legend { font-weight: 700; color: var(--clr-accent-dark); padding: 0 0.5rem; }
+body.dark-mode form legend { color: var(--clr-accent); }
+
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-weight: 600; margin-bottom: 0.3rem; font-size: 0.95rem; }
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="password"],
+.field input[type="tel"],
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #b7c4d0;
+  border-radius: 6px;
+  font: inherit;
+  background: var(--clr-surface);
+  color: var(--clr-text);
+}
+.field textarea { resize: vertical; min-height: 110px; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: 2px solid var(--clr-accent);
+  border-color: var(--clr-accent);
+}
+.inline-options { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+.inline-options label { font-weight: 400; }
+
+/* ---------- Footer ---------- */
+footer { background: var(--clr-primary); color: #c9d6e2; margin-top: 3rem; }
+.footer-cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 2.5rem 0 1.5rem;
+}
+.footer-col { flex: 1 1 220px; }
+.footer-col h4 { color: #fff; margin-bottom: 0.6rem; }
+.footer-col ul { list-style: none; }
+.footer-col a { color: #c9d6e2; text-decoration: none; }
+.footer-col a:hover { color: var(--clr-accent); }
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.85rem;
+}
+
+/* ============================================================
+   JS LAB ADDITIONS
+   ============================================================ */
+
+/* Welcome banner (Section A) — hidden until JS fills it in */
+.welcome-banner {
+  display: none;
+  background: var(--clr-accent);
+  color: #fff;
+  text-align: center;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+}
+.welcome-banner.visible { display: block; }
+
+/* Show/hide panel (Section D) */
+.hidden { display: none; }
+.info-panel {
+  background: var(--clr-surface);
+  border-left: 4px solid var(--clr-accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  box-shadow: var(--shadow);
+  padding: 1.25rem 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Validation states (Section B) */
+.field.invalid input,
+.field.invalid select,
+.field.invalid textarea,
+input.invalid, select.invalid, textarea.invalid,
+#level-group.invalid {
+  border: 2px solid var(--clr-danger);
+  border-radius: 6px;
+}
+#level-group.invalid { padding: 0.5rem; }
+.error-msg { color: var(--clr-danger); font-size: 0.85rem; margin-top: 0.3rem; min-height: 0; }
+
+.form-summary {
+  border-radius: var(--radius);
+  padding: 0.9rem 1.25rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  display: none;
+}
+.form-summary.error { display: block; background: #fdeaec; color: var(--clr-danger); }
+.form-summary.success { display: block; background: #e2f6ef; color: var(--clr-accent-dark); }
+body.dark-mode .form-summary.error { background: #3a1d22; }
+body.dark-mode .form-summary.success { background: #143229; color: var(--clr-accent); }
+
+/* Character counter (Section F) */
+.char-counter { font-size: 0.85rem; color: var(--clr-muted); margin-top: 0.25rem; }
+
+/* ---------- Responsive media queries ---------- */
+@media (max-width: 720px) {
+  .navbar .container { flex-direction: column; }
+  .nav-links { justify-content: center; gap: 0.9rem; }
+  .hero h1, .page-hero h1 { font-size: 1.8rem; }
+  .footer-cols { flex-direction: column; gap: 1.25rem; }
+}
+
+/* ============================================================
+   FINAL PROJECT ADDITIONS (PHP + MySQL pages)
+   Styles for process_register.php, view_registrations.php and
+   db_test.php. Everything reuses the same custom properties,
+   so dark mode works on these pages automatically.
+   ============================================================ */
+
+/* Result cards on the PHP confirmation page */
+.result-card {
+  background: var(--clr-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+}
+.result-card.ok  { border-left: 5px solid var(--clr-accent); }
+.result-card.bad { border-left: 5px solid var(--clr-danger); }
+.result-card h2 { margin-bottom: 0.6rem; }
+.result-card ul { margin: 0.5rem 0 0.75rem 1.25rem; color: var(--clr-danger); }
+
+/* Small labels, e.g. "POST" and the field count */
+.badge {
+  display: inline-block;
+  background: var(--clr-accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* Experience-level pills in the records table */
+.pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.12rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  color: #fff;
+}
+.pill.beginner     { background: var(--clr-accent-dark); }
+.pill.intermediate { background: #c98a12; }
+.pill.advanced     { background: var(--clr-danger); }
+
+/* Toolbar above the records table (Flexbox) */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+.search-form { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.search-form input {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #b7c4d0;
+  border-radius: 6px;
+  font: inherit;
+  min-width: 230px;
+  background: var(--clr-surface);
+  color: var(--clr-text);
+}
+.search-form input:focus { outline: 2px solid var(--clr-accent); border-color: var(--clr-accent); }
+
+/* Per-course stat strip (Flexbox) */
+.stats { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+.stat {
+  flex: 1 1 180px;
+  background: var(--clr-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem 1.25rem;
+}
+.stat .num { font-size: 1.7rem; font-weight: 700; color: var(--clr-accent-dark); }
+body.dark-mode .stat .num { color: var(--clr-accent); }
+.stat .lbl { font-size: 0.85rem; color: var(--clr-muted); }
+
+/* Horizontal scroll wrapper so the records table works on phones */
+.table-scroll { overflow-x: auto; }
+.table-scroll table { min-width: 760px; }
+
+/* Empty state when no records match */
+.empty-state {
+  background: var(--clr-surface);
+  border: 1px dashed #b7c4d0;
+  border-radius: var(--radius);
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+}
+body.dark-mode .empty-state { border-color: #2c3f52; }
+
+@media (max-width: 720px) {
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .search-form input { min-width: 0; flex: 1 1 auto; }
+}
