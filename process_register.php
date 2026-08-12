@@ -11,9 +11,6 @@
      4. Inserts the record with a prepared statement
      5. Prints a confirmation showing exactly what was received
 
-   Rubric: PHP form processing (8 marks)
-           Database connection + data insertion (4 marks)
-   ============================================================ */
 
 require_once 'db_connect.php';        // provides $conn, e(), courseName()
 
@@ -23,10 +20,7 @@ $success = false;
 $newId   = null;
 
 /* ------------------------------------------------------------
-   STEP 1 — POST ONLY
-   Typing this file's URL into the address bar sends a GET
-   request, which is refused with 405 Method Not Allowed.
-   That is the visible proof the form uses POST.
+
    ------------------------------------------------------------ */
 if ($requestMethod !== 'POST') {
     http_response_code(405);
