@@ -12,6 +12,26 @@
 require_once 'db_connect.php';        // provides $conn, e(), courseName()
 
 /* ------------------------------------------------------------
+   ACCESS CONTROL
+   This page lists real people's names, emails and phone
+   numbers. Without this guard, anyone who knew the URL could
+   read the whole learner database. requireStaffLogin() sends
+   unauthenticated visitors to login.php and stops the script
+   before a single record is queried or rendered.
+   ------------------------------------------------------------ */
+requireStaffLogin();
+
+/* Show only enough of a number to identify a record, so a
+   glance at the screen (or a screen recording) does not expose
+   full contact details. */
+function maskPhone($phone)
+{
+    return strlen($phone) >= 6
+        ? substr($phone, 0, 7) . ' *** ' . substr($phone, -3)
+        : $phone;
+}
+
+/* ------------------------------------------------------------
    SEARCH FILTER
    GET is correct here because a search reads data rather than
    changing it. The value still goes through a prepared
@@ -73,6 +93,7 @@ $grandTotal = $conn->query("SELECT COUNT(*) AS c FROM registrations")->fetch_ass
           <li><a href="gallery.html">Gallery</a></li>
           <li><a href="register.html">Register</a></li>
           <li><a href="view_registrations.php" class="active">Registrations</a></li>
+          <li><a href="logout.php">Sign out</a></li>
           <li><button id="theme-toggle" class="theme-btn" type="button">🌙 Dark mode</button></li>
         </ul>
       </nav>
@@ -142,7 +163,7 @@ $grandTotal = $conn->query("SELECT COUNT(*) AS c FROM registrations")->fetch_ass
                   <td><?= e($row['id']) ?></td>
                   <td><?= e($row['fullname']) ?></td>
                   <td><?= e($row['email']) ?></td>
-                  <td><?= e($row['phone']) ?></td>
+                  <td><?= e(maskPhone($row['phone'])) ?></td>
                   <td><span class="pill <?= e($row['level']) ?>"><?= e($row['level']) ?></span></td>
                   <td><?= e(courseName($row['course'])) ?></td>
                   <td>

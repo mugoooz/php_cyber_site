@@ -9,24 +9,23 @@
      3. Re-validates on the server (JavaScript can be disabled,
         so client-side checks are never trusted on their own)
      4. Inserts the record with a prepared statement
-     5. Prints a confirmation showing exactly what was received
+     5. Confirms the submission without leaking internal state
 
    Rubric: PHP form processing (8 marks)
            Database connection + data insertion (4 marks)
    ============================================================ */
 
-require_once 'db_connect.php';        // provides $conn, e(), courseName()
+require_once 'db_connect.php';        // $conn, e(), courseName(), normalizePhone()
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $errors  = [];
 $success = false;
-$newId   = null;
 
 /* ------------------------------------------------------------
    STEP 1 — POST ONLY
    Typing this file's URL into the address bar sends a GET
-   request, which is refused with 405 Method Not Allowed.
-   That is the visible proof the form uses POST.
+   request, which is refused with 405 Method Not Allowed. That
+   is the visible proof the form uses POST.
    ------------------------------------------------------------ */
 if ($requestMethod !== 'POST') {
     http_response_code(405);
@@ -36,13 +35,13 @@ if ($requestMethod === 'POST') {
 
     /* --------------------------------------------------------
        STEP 2 — READ THE POSTED DATA
-       Each name="..." attribute in register.html becomes a
-       key in the $_POST superglobal.
+       Each name="..." attribute in register.html becomes a key
+       in the $_POST superglobal.
        -------------------------------------------------------- */
     $fullname = trim($_POST['fullname'] ?? '');
     $email    = trim($_POST['email']    ?? '');
     $password = $_POST['password']      ?? '';
-    $phone    = trim($_POST['phone']    ?? '');
+    $phoneRaw = trim($_POST['phone']    ?? '');
     $level    = trim($_POST['level']    ?? '');    // radio group
     $course   = trim($_POST['course']   ?? '');    // select (short code)
     $goals    = trim($_POST['goals']    ?? '');    // textarea
@@ -50,6 +49,9 @@ if ($requestMethod === 'POST') {
        absent from $_POST entirely when not, so isset() is the
        correct test. */
     $terms    = isset($_POST['terms']) ? 1 : 0;
+
+    /* Reduce whatever phone format was typed to +254XXXXXXXXX */
+    $phone = normalizePhone($phoneRaw);
 
     /* --------------------------------------------------------
        STEP 3 — SERVER-SIDE VALIDATION
@@ -66,18 +68,24 @@ if ($requestMethod === 'POST') {
         $errors[] = 'Email address is required.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'That email address is not valid.';
+    } elseif (mb_strlen($email) > 150) {
+        $errors[] = 'That email address is too long.';
     }
 
     if ($password === '') {
         $errors[] = 'Password is required.';
     } elseif (strlen($password) < 6) {
         $errors[] = 'Password must be at least 6 characters.';
+    } elseif (strlen($password) > 200) {
+        /* Very long inputs make hashing needlessly expensive,
+           which is a cheap denial-of-service route. */
+        $errors[] = 'Password must be 200 characters or fewer.';
     }
 
-    if ($phone === '') {
+    if ($phoneRaw === '') {
         $errors[] = 'Phone number is required.';
-    } elseif (!preg_match('/^\+?[0-9\s\-]{7,20}$/', $phone)) {
-        $errors[] = 'Phone number may contain digits, spaces, hyphens and a leading + only.';
+    } elseif ($phone === '') {
+        $errors[] = 'Enter a full Kenyan mobile number, for example +254 712 345 678.';
     }
 
     $allowedLevels = ['beginner', 'intermediate', 'advanced'];
@@ -107,8 +115,8 @@ if ($requestMethod === 'POST') {
 
     /* --------------------------------------------------------
        STEP 4 — INSERT WITH A PREPARED STATEMENT
-       The SQL and the user data travel in separate channels,
-       so nothing typed into the form can execute as SQL.
+       The SQL and the user data travel in separate channels, so
+       nothing typed into the form can execute as SQL.
        -------------------------------------------------------- */
     if (empty($errors)) {
 
@@ -131,18 +139,27 @@ if ($requestMethod === 'POST') {
             );
 
             $stmt->execute();
-
-            $newId   = $conn->insert_id;   // AUTO_INCREMENT id of the new row
             $success = true;
-
             $stmt->close();
 
+            /* The new row's AUTO_INCREMENT id is deliberately NOT
+               shown to the visitor. Sequential identifiers reveal
+               how many people have registered and invite anyone
+               to guess other users' record numbers. */
+
         } catch (mysqli_sql_exception $ex) {
-            // 1062 = duplicate value on the UNIQUE email key
+
+            error_log('Registration insert failed: ' . $ex->getMessage());
+
             if ((int) $ex->getCode() === 1062) {
-                $errors[] = 'That email address is already registered. Use a different one.';
+                /* Duplicate email. Worth noting: a precise message
+                   here lets an attacker test addresses one by one
+                   to learn who has an account (user enumeration).
+                   The wording below confirms nothing on its own. */
+                $errors[] = 'We could not complete this registration. '
+                          . 'If you have registered before, contact us instead of signing up again.';
             } else {
-                $errors[] = 'The registration could not be saved: ' . $ex->getMessage();
+                $errors[] = 'We could not save your registration right now. Please try again shortly.';
             }
         }
     }
@@ -200,18 +217,14 @@ if ($requestMethod === 'POST') {
 <?php elseif ($success): ?>
 
       <div class="result-card ok">
-        <h2>✅ Registration saved</h2>
-        <p>Thank you, <strong><?= e($fullname) ?></strong>. Your enrolment is
-          stored in the database under reference <strong>#<?= e($newId) ?></strong>.
-          A confirmation will be sent to <strong><?= e($email) ?></strong>.</p>
+        <h2>✅ Registration received</h2>
+        <p>Thank you, <strong><?= e($fullname) ?></strong>. Your enrolment has
+          been recorded and a confirmation will be sent to
+          <strong><?= e($email) ?></strong> within two working days.</p>
       </div>
 
       <div class="result-card">
-        <h2>Data received by the server</h2>
-        <p>
-          Request method: <span class="badge"><?= e($requestMethod) ?></span>
-          &nbsp; Fields in <code>$_POST</code>: <span class="badge"><?= count($_POST) ?></span>
-        </p>
+        <h2>Summary of what you submitted</h2>
 
         <div class="table-scroll">
           <table>
@@ -222,19 +235,20 @@ if ($requestMethod === 'POST') {
               <tr><td>Full name</td>       <td><?= e($fullname) ?></td></tr>
               <tr><td>Email</td>           <td><?= e($email) ?></td></tr>
               <tr><td>Phone</td>           <td><?= e($phone) ?></td></tr>
-              <tr><td>Password</td>        <td>Received, then hashed with <code>password_hash()</code>. The plain text is never stored or displayed.</td></tr>
+              <tr><td>Password</td>        <td>Received and securely encrypted before storage. The plain text is never stored or displayed.</td></tr>
               <tr><td>Experience level</td><td><span class="pill <?= e($level) ?>"><?= e($level) ?></span></td></tr>
-              <tr><td>Preferred course</td><td><?= e(courseName($course)) ?> <em>(submitted as "<?= e($course) ?>")</em></td></tr>
+              <tr><td>Preferred course</td><td><?= e(courseName($course)) ?></td></tr>
               <tr><td>Learning goals</td>  <td><?= $goals !== '' ? nl2br(e($goals)) : '<em>Not provided</em>' ?></td></tr>
               <tr><td>Terms accepted</td>  <td><?= $terms ? 'Yes' : 'No' ?></td></tr>
             </tbody>
           </table>
         </div>
 
+        <p>This summary shows only what you just typed. Internal details such as
+          the database record number are not published.</p>
+
         <p style="margin-top:1.5rem">
-          <a class="btn" href="view_registrations.php">View all registrations</a>
-          &nbsp;
-          <a class="btn btn-outline" href="register.html">Register another learner</a>
+          <a class="btn" href="register.html">Register another learner</a>
         </p>
       </div>
 

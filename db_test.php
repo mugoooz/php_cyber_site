@@ -9,6 +9,15 @@
 
 require_once 'db_connect.php';
 
+/* ------------------------------------------------------------
+   ACCESS CONTROL
+   This page reports the MySQL version, PHP version, database
+   name and table names. That is a free reconnaissance report
+   for anyone probing the site, so it is staff-only — and it
+   should be deleted entirely before any real deployment.
+   ------------------------------------------------------------ */
+requireStaffLogin();
+
 $tables = [];
 $res = $conn->query('SHOW TABLES FROM ' . DB_NAME);
 while ($row = $res->fetch_array(MYSQLI_NUM)) {

@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initShowHide();         // Section D — Home page only
   initGalleryFlip();      // Section E — Gallery page only
   initFormValidation();   // Sections B + F — Register page only
+  initPhoneFormat();      // Section G — Register page only
 });
 
 /* ============================================================
@@ -84,6 +85,11 @@ function initFormValidation() {
     var pass = form.elements["password"];
     if (pass && pass.value && pass.value.length < 6) {
       errors.push(markInvalid(pass, "Password must be at least 6 characters."));
+    }
+    // Phone must be a complete Kenyan mobile number in the masked format
+    var tel = form.elements["phone"];
+    if (tel && tel.value.trim() && !/^\+254 \d{3} \d{3} \d{3}$/.test(tel.value.trim())) {
+      errors.push(markInvalid(tel, "Enter a full number, e.g. +254 712 345 678."));
     }
 
     // --- Radio group: experience level ---
@@ -249,4 +255,69 @@ function initCharCounter(form) {
     counter.textContent = length + " / " + LIMIT + " characters";
     counter.style.color = length > LIMIT ? "#d64550" : "";
   });
+}
+
+
+/* ============================================================
+   SECTION G — PHONE NUMBER INPUT MASK
+   Formats the phone field to +254 7XX XXX XXX as the visitor
+   types, so the value always matches the placeholder.
+
+   Accepts every way a Kenyan number is normally written:
+     0712345678      -> +254 712 345 678
+     712345678       -> +254 712 345 678
+     254712345678    -> +254 712 345 678
+     +254712345678   -> +254 712 345 678
+   ============================================================ */
+function initPhoneFormat() {
+  var input = document.getElementById("phone");
+  if (!input) return; // not on the Register page
+
+  input.setAttribute("inputmode", "tel");
+  input.setAttribute("maxlength", "16"); // "+254 712 345 678"
+
+  input.addEventListener("input", function (event) {
+    // Allow the field to be emptied completely with backspace
+    var deleting = !!(event.inputType && event.inputType.indexOf("delete") === 0);
+    var atEnd = input.selectionStart === input.value.length;
+
+    var formatted = formatKenyanPhone(input.value, deleting);
+    if (formatted === input.value) return;
+
+    input.value = formatted;
+    // Keep the caret at the end when typing normally
+    if (atEnd) input.setSelectionRange(formatted.length, formatted.length);
+  });
+
+  // Tidy a trailing space if the visitor leaves the field mid-way
+  input.addEventListener("blur", function () {
+    input.value = input.value.replace(/[\s+]+$/, "").replace(/^\+254$/, "");
+  });
+}
+
+/* Turns any raw input into the +254 7XX XXX XXX pattern */
+function formatKenyanPhone(raw, deleting) {
+  var digits = raw.replace(/\D/g, ""); // keep numbers only
+  var hadPrefix = false;
+
+  // Strip whichever country-code form was typed
+  if (digits.indexOf("254") === 0) {
+    digits = digits.slice(3);
+    hadPrefix = true;
+  } else if (digits.indexOf("0") === 0) {
+    digits = digits.slice(1); // local 07... form
+    hadPrefix = true;
+  }
+
+  digits = digits.slice(0, 9); // 9 digits after the country code
+
+  if (digits === "") {
+    if (deleting) return "";          // let backspace clear the field
+    return hadPrefix ? "+254 " : "";
+  }
+
+  var out = "+254 " + digits.slice(0, 3);
+  if (digits.length > 3) out += " " + digits.slice(3, 6);
+  if (digits.length > 6) out += " " + digits.slice(6, 9);
+  return out;
 }
